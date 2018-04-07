@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border: 1px solid #d3d3d3;
+    background-color: #bbada0;
+}
+</style>
+<script>
+
+var score = 0;
+var merged;
+var componentsOnBoard = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
+var isInAnimation = false;
+
+var myGameArea = {
+    canvas: document.createElement("canvas"),
+    start: function () {
+        this.canvas.width = 425;
+        this.canvas.height = 425;
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+    },
+    clear: function () {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+    restart: function () {
+        numberOfFreeSquares = 16;
+        score = 0;
+        updateScore();
+        clearMerged();
+        componentsOnBoard = [];
+        myGameArea.clear();
+        startGame();
+    }
+}
+
+window.addEventListener("keydown", moveSomething, false);
+
+//1437
+
+function checkAllSides(i, j) {
+    var result = 0;
+    var current = i * 4 + j;
+    var next = current + 4;
+    if (i !== 3) {
+        if (componentsOnBoard[next].number === componentsOnBoard[current].number) {
+            result++;
+        }
+    }
+    next = current - 4;
+    if (i !== 0) {
+        if (componentsOnBoard[next].number === componentsOnBoard[current].number) {
+            result++;
+        }
+    }
+    next = current + 1;
+    if (j !== 3) {
+        if (componentsOnBoard[next].number === componentsOnBoard[current].number) {
+            result++;
+        }
+    }
+    next = current - 1;
+    if (j !== 0) {
+        if (componentsOnBoard[next].number === componentsOnBoard[current].number) {
+            result++;
+        }
+    }
+    return result;
+}
+
+function checking() {
+    if (numberOfFreeSquares === 0) {
+        updateGameArea();
+        var result = 0;
+        for (var i = 0; i < 16; i++) {
+            result += checkAllSides((i - (i % 4)) / 4, i % 4);
+        }
+        if (result === 0) {
+            alert("GAME OVER, FOLKS!");
+        }
+    }
+}
+
+function updateScore() {
+    var sc = document.getElementById("score");
+    sc.innerText = score;
+}
+
+function updateGameArea() {
+    myGameArea.clear();
+    for (var i = 0; i < componentsOnBoard.length; i++) {
+        if (componentsOnBoard[i] !== null) {
+            componentsOnBoard[i].update();
+        }
+    }
+}
+
+function moveCellDown(i, j, counter, onComplete) {
+    var current = i * 4 + j;
+    var next = current + 4;
+    return moveCell(current, next, 0, 100, counter, onComplete);
+}
+
+function moveCellUp(i, j, counter, onComplete) {
+    var current = i * 4 + j;
+    var next = current - 4;
+    return moveCell(current, next, 0, -100, counter, onComplete);
+}
+
+function moveCellLeft(i, j, counter, onComplete) {
+    var current = i * 4 + j;
+    var next = current - 1;
+    return moveCell(current, next, -100, 0, counter, onComplete);
+}
+
+function moveCellRight(i, j, counter, onComplete) {
+    var current = i * 4 + j;
+    var next = current + 1;
+    return moveCell(current, next, 100, 0, counter, onComplete);
+}
+
+function moveXSlowly(deltaX, component, onComplete) {
+    if (deltaX === 0) {
+        return;
+    }
+    isInAnimation = true;
+    var counter = 10;
+    var delta = deltaX / counter;
+    var func = function () {
+        component.x += delta;
+        counter--;
+        if (counter > 0) {
+            setTimeout(func, 10);
+        } else {
+            if (onComplete) {
+                onComplete();
+            }
+            isInAnimation = false;
+        }
+    }
+    setTimeout(func, 10);
+}
+
+function moveYSlowly(deltaY, component, onComplete) {
+    if (deltaY === 0) {
+        return;
+    }
+    isInAnimation = true;
+    var counter = 10;
+    var delta = deltaY / counter;
+    var func = function () {
+        component.y += delta;
+        counter--;
+        if (counter > 0) {
+            setTimeout(func, 10);
+        } else {
+            if (onComplete) {
+                onComplete();
+            }
+            isInAnimation = false;
+        }
+    }
+    setTimeout(func, 10);
+}
+
+var animCounter = 0;
+
+function moveCell(current, next, deltaX, deltaY, counter, onMoveComplete) {
+    if (componentsOnBoard[current] !== null) {
+        if (componentsOnBoard[next] === null) {
+            componentsOnBoard[next] = componentsOnBoard[current];
+            componentsOnBoard[current] = null;
+            animCounter++;
+            var onComplete = function() {
+                animCounter--;
+                if (animCounter === 0)
+                {
+                    if (onMoveComplete)
+                    {
+                        onMoveComplete();
+                    }
+                }
+            }
+            moveXSlowly(deltaX, componentsOnBoard[next], onComplete);
+            moveYSlowly(deltaY, componentsOnBoard[next], onComplete);
+            return 1;
+        }
+        else if (componentsOnBoard[next].number === componentsOnBoard[current].number) {
+            if (!merged[next] && !merged[current]) {
+                merged[next] = true;
+                animCounter++;
+                componentsOnBoard.push(componentsOnBoard[current]);
+                var onComplete = function() {
+                    componentsOnBoard[next].number = componentsOnBoard[next].number * 2;
+                    score += componentsOnBoard[next].number;
+                    numberOfFreeSquares++;
+                    animCounter--;
+                    if (animCounter === 0)
+                    {
+                        if (onMoveComplete)
+                        {
+                            onMoveComplete();
+                        }
+                    }
+                }
+                moveXSlowly(deltaX, componentsOnBoard[current], onComplete);
+                moveYSlowly(deltaY, componentsOnBoard[current], onComplete);
+                componentsOnBoard[current] = null;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+
+function clearMerged() {
+    merged = [];
+    for (var i = 0; i < 16; i++) {
+        merged[i] = false;
+    }
+}
+
+function moveDown() {
+    var result = 0;
+    clearMerged();
+    var onComplete = function() {
+        componentsOnBoard.splice(16, componentsOnBoard.length - 16);
+        spawnNumber();
+    }
+    for (var n = 0; n < 3; n++) {
+        for (var i = 2; i >= n; i--) {
+            for (var j = 0; j < 4; j++) {
+                result = moveCellDown(i, j, result, onComplete);
+            }
+        }
+    }
+}
+
+function moveUp() {
+    var result = 0;
+    clearMerged();
+    var onComplete = function() {
+        componentsOnBoard.splice(16, componentsOnBoard.length - 16);
+        spawnNumber();
+    }
+    for (var n = 3; n > 0; n--) {
+        for (var i = 1; i <= n; i++) {
+            for (var j = 0; j < 4; j++) {
+                result = moveCellUp(i, j, result, onComplete);
+            }
+        }
+    }
+}
+
+function moveLeft() {
+    var result = 0;
+    clearMerged();
+    var onComplete = function() {
+        componentsOnBoard.splice(16, componentsOnBoard.length - 16);
+        spawnNumber();
+    }
+    for (var n = 3; n > 0; n--) {
+        for (var j = 1; j <= n; j++) {
+            for (var i = 0; i < 4; i++) {
+                result = moveCellLeft(i, j, result, onComplete);
+            }
+        }
+    }
+}
+
+function moveRight() {
+    var result = 0;
+    clearMerged();
+    var onComplete = function() {
+        componentsOnBoard.splice(16, componentsOnBoard.length - 16);
+        spawnNumber();
+    }
+    for (var n = 0; n < 3; n++) {
+        for (var j = 2; j >= n; j--) {
+            for (var i = 0; i < 4; i++) {
+                result = moveCellRight(i, j, result, onComplete);
+            }
+        }
+    }
+}
+
+function moveSomething(e) {
+    if (isInAnimation)
+    {
+        return;
+    }
+    switch(e.keyCode) {
+        case 37:
+            moveLeft();
+            checking();
+            updateScore();
+            break;
+        case 38:
+            moveUp();
+            checking();
+            updateScore();
+            break;
+        case 39:
+            moveRight();
+            checking();
+            updateScore();
+            break;
+        case 40:
+            moveDown();
+            checking();
+            updateScore();
+            break;
+    }
+}
+
+
+function startGame() {
+    myGameArea.start();
+    this.interval = setInterval(updateGameArea, 20);
+    spawnNumber();
+    spawnNumber();
+}
+
+var numberOfFreeSquares = 16;
+
+function Component(width, height, x, y, number) {
+    this.width = width;
+    this.height = height;
+    this.x = x;
+    this.y = y;
+    this.number = number;
+    this.update = function() {
+        ctx = myGameArea.context;
+        ctx.fillStyle = "rgba(238, 228, 218, 0.35)";
+        var fontColor = "black";
+        if (this.number === 2) {
+            ctx.fillStyle = "#ffbb99";
+            fontColor = "black";
+        }
+        else if (this.number === 4) {
+            ctx.fillStyle = "#ff9988";
+            fontColor = "black";
+        }
+        else if (this.number === 8) {
+            ctx.fillStyle = "#ff7777";
+            fontColor = "black";
+        }
+        else if (this.number === 16) {
+            ctx.fillStyle = "#ff5566";
+            fontColor = "black";
+        }
+        else if (this.number === 32) {
+            ctx.fillStyle = "#ff3355";
+            fontColor = "black";
+        }
+        else if (this.number === 64) {
+            ctx.fillStyle = "#ff2900";
+            fontColor = "black";
+        }
+        else if (this.number === 128) {
+            ctx.fillStyle = "#eeee88";
+            fontColor = "gray";
+        }
+        else if (this.number === 256) {
+            ctx.fillStyle = "#eeee66";
+            fontColor = "gray";
+        }
+        else if (this.number === 512) {
+            ctx.fillStyle = "#eeee44";
+            fontColor = "gray";
+        }
+        else if (this.number === 1024) {
+            ctx.fillStyle = "#eeee22";
+            fontColor = "gray";
+        }
+        else if (this.number === 2048) {
+            ctx.fillStyle = "#eeee00";
+            fontColor = "black";
+        }
+        else if (this.number >= 2048) {
+            ctx.fillStyle = "#eeee00";
+            fontColor = "black";
+        }
+        ctx.fillStyle = "";
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        if (this.number !== 0) {
+            ctx.font = "bold 30px Arial";
+            ctx.fillStyle = fontColor;
+            var offset;
+            if (this.number < 10)
+            {
+                offset = 0;
+            } 
+            else if (this.number < 100)
+            {
+                offset = 8;
+            }
+            else if (this.number < 1000)
+            {
+                offset = 17;
+            }
+            else if (this.number < 10000)
+            {
+                offset = 26;
+            } 
+            else
+            {
+                offset = 26;
+                ctx.font = "bold 24px Arial";
+            }
+
+            ctx.fillText(this.number, this.x + 32 - offset, this.y + 50);
+        }
+    }
+}
+
+function spawnNumber() {
+    var n = 0;
+    var num = Math.round(Math.random() * 12);
+    if (num >= 11) {
+        num = 4;
+    } else {
+        num = 2;
+    }
+    var numbers = Math.floor(Math.random() * numberOfFreeSquares);
+    for (var i = 0; i < 16; i++) {
+        if (componentsOnBoard[i] === null) {
+            if (n === numbers) {
+                componentsOnBoard[i] = new Component(80, 80, 20 + 100 * (i % 4), 20 + 100 * ((i - (i % 4)) / 4), num);
+                numberOfFreeSquares--;
+                return;
+            }
+            n++;
+        }
+    }
+}
+
+</script>
+</head>
+<body onload="startGame()" style="text-align: center; vertical-align: middle">
+<button onclick="myGameArea.restart()">New Game</button>
+<div id="score">0</div>
+</body>
+</html>
