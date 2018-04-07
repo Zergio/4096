@@ -74,13 +74,15 @@ function checkAllSides(i, j) {
 function checking() {
     if (numberOfFreeSquares === 0) {
         updateGameArea();
-        var result = 0;
-        for (var i = 0; i < 16; i++) {
-            result += checkAllSides((i - (i % 4)) / 4, i % 4);
-        }
-        if (result === 0) {
-            alert("GAME OVER, FOLKS!");
-        }
+        setTimeout(function() {
+            var result = 0;
+            for (var i = 0; i < 16; i++) {
+                result += checkAllSides((i - (i % 4)) / 4, i % 4);
+            }
+            if (result === 0) {
+                alert("GAME OVER, FOLKS!");
+            }
+        }, 20);
     }
 }
 
@@ -192,11 +194,11 @@ function moveCell(current, next, deltaX, deltaY, counter, onMoveComplete) {
             if (!merged[next] && !merged[current]) {
                 merged[next] = true;
                 animCounter++;
+                numberOfFreeSquares++;
                 componentsOnBoard.push(componentsOnBoard[current]);
                 var onComplete = function() {
                     componentsOnBoard[next].number = componentsOnBoard[next].number * 2;
                     score += componentsOnBoard[next].number;
-                    numberOfFreeSquares++;
                     animCounter--;
                     if (animCounter === 0)
                     {
@@ -229,6 +231,8 @@ function moveDown() {
     var onComplete = function() {
         componentsOnBoard.splice(16, componentsOnBoard.length - 16);
         spawnNumber();
+        checking();
+        updateScore();
     }
     for (var n = 0; n < 3; n++) {
         for (var i = 2; i >= n; i--) {
@@ -245,6 +249,8 @@ function moveUp() {
     var onComplete = function() {
         componentsOnBoard.splice(16, componentsOnBoard.length - 16);
         spawnNumber();
+        updateScore();
+        checking();
     }
     for (var n = 3; n > 0; n--) {
         for (var i = 1; i <= n; i++) {
@@ -261,6 +267,8 @@ function moveLeft() {
     var onComplete = function() {
         componentsOnBoard.splice(16, componentsOnBoard.length - 16);
         spawnNumber();
+        updateScore();
+        checking();
     }
     for (var n = 3; n > 0; n--) {
         for (var j = 1; j <= n; j++) {
@@ -277,6 +285,8 @@ function moveRight() {
     var onComplete = function() {
         componentsOnBoard.splice(16, componentsOnBoard.length - 16);
         spawnNumber();
+        updateScore();
+        checking();
     }
     for (var n = 0; n < 3; n++) {
         for (var j = 2; j >= n; j--) {
@@ -295,23 +305,15 @@ function moveSomething(e) {
     switch(e.keyCode) {
         case 37:
             moveLeft();
-            checking();
-            updateScore();
             break;
         case 38:
             moveUp();
-            checking();
-            updateScore();
             break;
         case 39:
             moveRight();
-            checking();
-            updateScore();
             break;
         case 40:
             moveDown();
-            checking();
-            updateScore();
             break;
     }
 }
