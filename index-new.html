@@ -35,11 +35,9 @@ var myGameArea = {
         myGameArea.clear();
         startGame();
     }
-}
+};
 
 window.addEventListener("keydown", moveSomething, false);
-
-//1437
 
 function checkAllSides(i, j) {
     var result = 0;
@@ -82,7 +80,7 @@ function checking() {
             if (result === 0) {
                 alert("GAME OVER, FOLKS!");
             }
-        }, 20);
+        }, 120);
     }
 }
 
@@ -100,35 +98,34 @@ function updateGameArea() {
     }
 }
 
-function moveCellDown(i, j, counter, onComplete) {
+function moveCellDown(i, j, onComplete) {
     var current = i * 4 + j;
     var next = current + 4;
-    return moveCell(current, next, 0, 100, counter, onComplete);
+    return moveCell(current, next, 0, 100, onComplete);
 }
 
-function moveCellUp(i, j, counter, onComplete) {
+function moveCellUp(i, j, onComplete) {
     var current = i * 4 + j;
     var next = current - 4;
-    return moveCell(current, next, 0, -100, counter, onComplete);
+    return moveCell(current, next, 0, -100, onComplete);
 }
 
-function moveCellLeft(i, j, counter, onComplete) {
+function moveCellLeft(i, j, onComplete) {
     var current = i * 4 + j;
     var next = current - 1;
-    return moveCell(current, next, -100, 0, counter, onComplete);
+    return moveCell(current, next, -100, 0, onComplete);
 }
 
-function moveCellRight(i, j, counter, onComplete) {
+function moveCellRight(i, j, onComplete) {
     var current = i * 4 + j;
     var next = current + 1;
-    return moveCell(current, next, 100, 0, counter, onComplete);
+    return moveCell(current, next, 100, 0, onComplete);
 }
 
 function moveXSlowly(deltaX, component, onComplete) {
     if (deltaX === 0) {
         return;
     }
-    isInAnimation = true;
     var counter = 10;
     var delta = deltaX / counter;
     var func = function () {
@@ -140,9 +137,8 @@ function moveXSlowly(deltaX, component, onComplete) {
             if (onComplete) {
                 onComplete();
             }
-            isInAnimation = false;
         }
-    }
+    };
     setTimeout(func, 10);
 }
 
@@ -150,7 +146,6 @@ function moveYSlowly(deltaY, component, onComplete) {
     if (deltaY === 0) {
         return;
     }
-    isInAnimation = true;
     var counter = 10;
     var delta = deltaY / counter;
     var func = function () {
@@ -162,15 +157,62 @@ function moveYSlowly(deltaY, component, onComplete) {
             if (onComplete) {
                 onComplete();
             }
-            isInAnimation = false;
         }
-    }
+    };
+    setTimeout(func, 10);
+}
+
+function spawningAnimation(component, onComplete) {
+    var counter = 7;
+    var delta = 35 / counter;
+    var func = function () {
+        component.width += delta * 2;
+        component.height += delta * 2;
+        component.x -= delta;
+        component.y -= delta;
+        counter--;
+        if (counter > 0) {
+            setTimeout(func, 10);
+        } else {
+            if (onComplete) {
+                onComplete();
+            }
+        }
+    };
+    setTimeout(func, 10);
+}
+
+function mergingAnimation(component, onComplete) {
+    var counter = 6;
+    var delta = 2;
+    var func = function () {
+        if (counter > 3) {
+            component.x -= delta;
+            component.y -= delta;
+            component.width += delta * 2;
+            component.height += delta * 2;
+            counter--;
+            setTimeout(func, 10);
+        }
+        else if (counter > 0) {
+            component.x += delta;
+            component.y += delta;
+            component.width -= delta * 2;
+            component.height -= delta * 2;
+            counter--;
+            setTimeout(func, 10);
+        } else {
+            if (onComplete) {
+                onComplete();
+            }
+        }
+    };
     setTimeout(func, 10);
 }
 
 var animCounter = 0;
 
-function moveCell(current, next, deltaX, deltaY, counter, onMoveComplete) {
+function moveCell(current, next, deltaX, deltaY, onMoveComplete) {
     if (componentsOnBoard[current] !== null) {
         if (componentsOnBoard[next] === null) {
             componentsOnBoard[next] = componentsOnBoard[current];
@@ -185,7 +227,7 @@ function moveCell(current, next, deltaX, deltaY, counter, onMoveComplete) {
                         onMoveComplete();
                     }
                 }
-            }
+            };
             moveXSlowly(deltaX, componentsOnBoard[next], onComplete);
             moveYSlowly(deltaY, componentsOnBoard[next], onComplete);
             return 1;
@@ -200,14 +242,14 @@ function moveCell(current, next, deltaX, deltaY, counter, onMoveComplete) {
                     componentsOnBoard[next].number = componentsOnBoard[next].number * 2;
                     score += componentsOnBoard[next].number;
                     animCounter--;
+                    mergingAnimation(componentsOnBoard[next]);
                     if (animCounter === 0)
                     {
-                        if (onMoveComplete)
-                        {
+                        if (onMoveComplete) {
                             onMoveComplete();
                         }
                     }
-                }
+                };
                 moveXSlowly(deltaX, componentsOnBoard[current], onComplete);
                 moveYSlowly(deltaY, componentsOnBoard[current], onComplete);
                 componentsOnBoard[current] = null;
@@ -225,75 +267,75 @@ function clearMerged() {
     }
 }
 
+function completeMoving() {
+    componentsOnBoard.splice(16, componentsOnBoard.length - 16);
+    spawnNumber();
+    updateScore();
+    checking();
+    isInAnimation = false;
+}
+
 function moveDown() {
     var result = 0;
     clearMerged();
-    var onComplete = function() {
-        componentsOnBoard.splice(16, componentsOnBoard.length - 16);
-        spawnNumber();
-        checking();
-        updateScore();
-    }
+    isInAnimation = true;
     for (var n = 0; n < 3; n++) {
         for (var i = 2; i >= n; i--) {
             for (var j = 0; j < 4; j++) {
-                result = moveCellDown(i, j, result, onComplete);
+                result += moveCellDown(i, j, completeMoving);
             }
         }
+    }
+    if (result === 0) {
+        isInAnimation = false;
     }
 }
 
 function moveUp() {
     var result = 0;
     clearMerged();
-    var onComplete = function() {
-        componentsOnBoard.splice(16, componentsOnBoard.length - 16);
-        spawnNumber();
-        updateScore();
-        checking();
-    }
+    isInAnimation = true;
     for (var n = 3; n > 0; n--) {
         for (var i = 1; i <= n; i++) {
             for (var j = 0; j < 4; j++) {
-                result = moveCellUp(i, j, result, onComplete);
+                result += moveCellUp(i, j, completeMoving);
             }
         }
+    }
+    if (result === 0) {
+        isInAnimation = false;
     }
 }
 
 function moveLeft() {
     var result = 0;
     clearMerged();
-    var onComplete = function() {
-        componentsOnBoard.splice(16, componentsOnBoard.length - 16);
-        spawnNumber();
-        updateScore();
-        checking();
-    }
+    isInAnimation = true;
     for (var n = 3; n > 0; n--) {
         for (var j = 1; j <= n; j++) {
             for (var i = 0; i < 4; i++) {
-                result = moveCellLeft(i, j, result, onComplete);
+                result += moveCellLeft(i, j, completeMoving);
             }
         }
+    }
+    if (result === 0) {
+        isInAnimation = false;
     }
 }
 
 function moveRight() {
     var result = 0;
     clearMerged();
-    var onComplete = function() {
-        componentsOnBoard.splice(16, componentsOnBoard.length - 16);
-        spawnNumber();
-        updateScore();
-        checking();
-    }
+    isInAnimation = true;
     for (var n = 0; n < 3; n++) {
         for (var j = 2; j >= n; j--) {
             for (var i = 0; i < 4; i++) {
-                result = moveCellRight(i, j, result, onComplete);
+                result += moveCellRight(i, j, completeMoving);
             }
         }
+    }
+    if (result === 0) {
+        isInAnimation = false;
     }
 }
 
@@ -389,7 +431,8 @@ function Component(width, height, x, y, number) {
         ctx.fillStyle = "";
         ctx.fillRect(this.x, this.y, this.width, this.height);
         if (this.number !== 0) {
-            ctx.font = "bold 30px Arial";
+            var currentSize = Math.round(this.height / 80 * 30);
+            ctx.font = "bold " + currentSize + "px Arial";
             ctx.fillStyle = fontColor;
             var offset;
             if (this.number < 10)
@@ -411,10 +454,14 @@ function Component(width, height, x, y, number) {
             else
             {
                 offset = 26;
-                ctx.font = "bold 24px Arial";
+                var currentSize = Math.round(this.height / 80 * 24);
+                ctx.font = "bold " + currentSize + "px Arial";
             }
 
-            ctx.fillText(this.number, this.x + 32 - offset, this.y + 50);
+            var offsetX = Math.round(offset - (this.width - 80) / 2);
+            var offsetY = Math.round((this.height - 80) / 2);
+
+            ctx.fillText(this.number, this.x + 32 - offsetX, this.y + 50 + offsetY);
         }
     }
 }
@@ -431,8 +478,9 @@ function spawnNumber() {
     for (var i = 0; i < 16; i++) {
         if (componentsOnBoard[i] === null) {
             if (n === numbers) {
-                componentsOnBoard[i] = new Component(80, 80, 20 + 100 * (i % 4), 20 + 100 * ((i - (i % 4)) / 4), num);
+                componentsOnBoard[i] = new Component(10, 10, 20 + 100 * (i % 4) + 35, 20 + 100 * ((i - (i % 4)) / 4) + 35, num);
                 numberOfFreeSquares--;
+                spawningAnimation(componentsOnBoard[i]);
                 return;
             }
             n++;
