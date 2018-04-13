@@ -32,6 +32,10 @@
             border-radius: 3px;
             margin-top: 8px;
         }
+        #name {
+            font-size: 50px;
+            font-weight: bold;
+        }
     </style>
     <script>
 
@@ -39,6 +43,8 @@
     var merged;
     var componentsOnBoard = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
     var isInAnimation = false;
+    var numberOfFreeSquares = 16;
+    var animCounter = 0;
 
     var myGameArea = {
         canvas: document.createElement("canvas"),
@@ -57,7 +63,7 @@
             score = 0;
             updateScore();
             clearMerged();
-            componentsOnBoard = [];
+            componentsOnBoard = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
             myGameArea.clear();
             startGame();
         }
@@ -236,8 +242,6 @@
         setTimeout(func, 10);
     }
 
-    var animCounter = 0;
-
     function moveCell(current, next, deltaX, deltaY, onMoveComplete) {
         if (componentsOnBoard[current] !== null) {
             if (componentsOnBoard[next] === null) {
@@ -394,8 +398,6 @@
         spawnNumber();
     }
 
-    var numberOfFreeSquares = 16;
-
     function Component(width, height, x, y, number) {
         this.width = width;
         this.height = height;
@@ -518,11 +520,17 @@
     </head>
     <body onload="startGame()" style="text-align: center; vertical-align: middle">
         <div id="container">
+            <strong id="name">2048</strong>
             <div id="header">
                 <div id="score">0</div>
                 <div id="newGame" onclick="myGameArea.restart()">New Game</div>
             </div>
             <div id="game"></div>
+            <p>
+                <strong>How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles. When two tiles with the same number touch, they <strong>merge into one!</strong>
+                <hr>
+                Note, this game is just a copy of the origional 2048 that was made by Gabriele Cirulli.
+            </p>
         </div>
     </body>
 </html>
