@@ -4,37 +4,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <style>
         canvas {
-            border: 1px solid #d3d3d3;
+            border: 5px solid #8f7a66;
             background-color: #bbada0;
         }
         #newGame {
-            border: 1px solid #7a7980;
-            background-color: #beb4b7;
+            padding: 0 20px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #f9f6f2;
+            line-height: 24px;
+            cursor: pointer;
             text-align: center;
-            vertical-align: middle;
+            border: 1px solid #8f7a66;
+            background-color: #8f7a66;
             width: 80px;
             height: 25px;
+            font-family: Arial,serif;
+            font-size: 14px;
+            font-weight: bolder;
+            margin-left: auto;
         }
-        #header {
-            width: 200px;
-            position: relative;
-            left: 440px;
+        #score1 {
+            background: #bbada0;
+            color: white;
+            padding: 5px 25px 5px 25px;
+            height: 3px;
+            width: 40px;
+            margin-left: auto;
+            font-family: Arial,serif;
+            font-size: 10px;
+            font-weight: bolder;
         }
         #score {
-            position: relative;
-            right: 60px;
-            font-size: 25px;
-            font-weight: bold;
-            display: inline-block;
-            padding: 15px 25px;
+            background: #bbada0;
+            color: white;
+            padding: 5px 25px 5px 25px;
             height: 25px;
-            line-height: 47px;
-            border-radius: 3px;
-            margin-top: 8px;
+            width: 40px;
+            margin-left: auto;
+            margin-bottom: 20px;
+            font-family: Arial,serif;
+            font-size: 25px;
+            font-weight: bolder;
         }
         #name {
+            font-family: Arial,serif;
             font-size: 50px;
             font-weight: bold;
+            color: #776e65;
+        }
+        #outerContainer {
+        }
+        #container {
+            width: 432px;
+            height: 700px;
+            margin: auto;
+        }
+        .unselectable {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            user-select: none;
         }
     </style>
     <script>
@@ -49,8 +83,8 @@
     var myGameArea = {
         canvas: document.createElement("canvas"),
         start: function () {
-            this.canvas.width = 425;
-            this.canvas.height = 425;
+            this.canvas.width = 422;
+            this.canvas.height = 422;
             this.context = this.canvas.getContext("2d");
             var element = document.getElementById("game");
             element.insertBefore(this.canvas, null);
@@ -121,8 +155,25 @@
         sc.innerText = score;
     }
 
+    var grid = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
+
+    function makeGrid() {
+        var ctx = myGameArea.context;
+        for (var i = 0; i < 4; i++) {
+            for (var j = 0; j < 4; j++) {
+                ctx.fillStyle = "rgba(238, 228, 218, 0.35)";
+                ctx.fillRect(20 + (i * 100), 20 + (j * 100), 80, 80);
+                ctx.beginPath();
+                ctx.rect(19 + (i * 100), 19 + (j * 100), 82, 82);
+                ctx.strokeStyle = "#8f7a66";
+                ctx.stroke();
+            }
+        }
+    }
+
     function updateGameArea() {
         myGameArea.clear();
+        makeGrid();
         for (var i = 0; i < componentsOnBoard.length; i++) {
             if (componentsOnBoard[i] !== null) {
                 componentsOnBoard[i].update();
@@ -370,8 +421,7 @@
     }
 
     function moveSomething(e) {
-        if (isInAnimation)
-        {
+        if (isInAnimation) {
             return;
         }
         switch(e.keyCode) {
@@ -394,6 +444,15 @@
     function startGame() {
         myGameArea.start();
         this.interval = setInterval(updateGameArea, 20);
+        window.requestAnimFrame = (function(callback) {
+            return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+                function(callback) {
+                    window.setTimeout(callback, 1000 / 60);
+                };
+        })();
+
+        window.requestAnimFrame(updateGameArea);
+
         spawnNumber();
         spawnNumber();
     }
@@ -409,28 +468,28 @@
             ctx.fillStyle = "rgba(238, 228, 218, 0.35)";
             var fontColor = "black";
             if (this.number === 2) {
-                ctx.fillStyle = "#ffbb99";
+                ctx.fillStyle = "#FFD0B8";
                 fontColor = "black";
             }
             else if (this.number === 4) {
-                ctx.fillStyle = "#ff9988";
+                ctx.fillStyle = "#FFB1A2";
                 fontColor = "black";
             }
             else if (this.number === 8) {
-                ctx.fillStyle = "#ff7777";
+                ctx.fillStyle = "#ff878b";
                 fontColor = "black";
             }
             else if (this.number === 16) {
-                ctx.fillStyle = "#ff5566";
+                ctx.fillStyle = "#ff6576";
                 fontColor = "black";
             }
             else if (this.number === 32) {
-                ctx.fillStyle = "#ff3355";
-                fontColor = "black";
+                ctx.fillStyle = "#ff4a6d";
+                fontColor = "white";
             }
             else if (this.number === 64) {
-                ctx.fillStyle = "#ff2900";
-                fontColor = "black";
+                ctx.fillStyle = "#ff1109";
+                fontColor = "white";
             }
             else if (this.number === 128) {
                 ctx.fillStyle = "#eeee88";
@@ -456,7 +515,6 @@
                 ctx.fillStyle = "#eeee00";
                 fontColor = "black";
             }
-            ctx.fillStyle = "";
             ctx.fillRect(this.x, this.y, this.width, this.height);
             if (this.number !== 0) {
                 var currentSize = Math.round(this.height / 80 * 30);
@@ -519,18 +577,22 @@
     </script>
     </head>
     <body onload="startGame()" style="text-align: center; vertical-align: middle">
-        <div id="container">
-            <strong id="name">2048</strong>
-            <div id="header">
-                <div id="score">0</div>
-                <div id="newGame" onclick="myGameArea.restart()">New Game</div>
+        <div id="outerContainer">
+            <div id="container">
+                <strong id="name">2048</strong>
+                <div id="header">
+                    <div id="score1">SCORE</div>
+                    <div id="score">0</div>
+                    <div id="newGame" class="unselectable" onclick="myGameArea.restart()">New Game</div>
+                </div>
+                <div id="game"></div>
+                <p style="color: #776e65">
+                    <strong>How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles.
+                    When two tiles with the same number touch, they <strong>merge into one!</strong>
+                    <hr />
+                    Note, this game is just a copy of the origional 2048 that was made by Gabriele Cirulli.
+                </p>
             </div>
-            <div id="game"></div>
-            <p>
-                <strong>How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles. When two tiles with the same number touch, they <strong>merge into one!</strong>
-                <hr>
-                Note, this game is just a copy of the origional 2048 that was made by Gabriele Cirulli.
-            </p>
         </div>
     </body>
 </html>

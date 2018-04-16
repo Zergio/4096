@@ -50,7 +50,7 @@ window.addEventListener("keydown", moveSomething, false);
 function updateState() {
     for (var i = 0; i < 16; ) {
         if (states !== 5) {
-            states[i] += 1;
+            states[i] +,= 1;
         } else {
             states[i] = 0;
         }
