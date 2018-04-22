@@ -8,7 +8,7 @@
             background-color: #bbada0;
         }
         #newGame {
-            padding: 0 20px;
+            padding: 5px 20px;
             margin-top: 10px;
             margin-bottom: 20px;
             text-decoration: none;
@@ -25,41 +25,52 @@
             font-weight: bolder;
             margin-left: auto;
         }
-        #score1 {
-            background: #bbada0;
+        #score-title {
             color: white;
-            padding: 5px 25px 5px 25px;
-            height: 3px;
-            width: 40px;
+            height: 12px;
+            width: 100%;
             margin-left: auto;
             font-family: Arial,serif;
             font-size: 10px;
             font-weight: bolder;
         }
         #score {
-            background: #bbada0;
             color: white;
-            padding: 5px 25px 5px 25px;
             height: 25px;
-            width: 40px;
-            margin-left: auto;
-            margin-bottom: 20px;
+            width: 100%;
+            margin: auto;
             font-family: Arial,serif;
             font-size: 25px;
             font-weight: bolder;
         }
         #name {
             font-family: Arial,serif;
-            font-size: 50px;
+            font-size: 95px;
             font-weight: bold;
             color: #776e65;
         }
-        #outerContainer {
+        #score-container {
+            text-align: center;
+            width: 100px;
+            padding: 5px;
+            background: #bbada0;
+            margin-left: auto;
+            margin-bottom: 15px;
+
+
         }
         #container {
             width: 432px;
             height: 700px;
             margin: auto;
+        }
+        #name-container {
+            float: left;
+            margin-left: 30px;
+        }
+        .notes {
+            color: #776e65;
+            font-family: Arial,serif;
         }
         .unselectable {
             -webkit-touch-callout: none;
@@ -579,17 +590,24 @@
     <body onload="startGame()" style="text-align: center; vertical-align: middle">
         <div id="outerContainer">
             <div id="container">
-                <strong id="name">2048</strong>
                 <div id="header">
-                    <div id="score1">SCORE</div>
-                    <div id="score">0</div>
+                    <div id="name-container">
+                        <strong id="name">2048</strong>
+                    </div>
+                    <div id="score-container">
+                        <div id="score-title">SCORE</div>
+                        <div id="score">0</div>
+                    </div>
                     <div id="newGame" class="unselectable" onclick="myGameArea.restart()">New Game</div>
                 </div>
                 <div id="game"></div>
-                <p style="color: #776e65">
+                <p style="
+">
                     <strong>How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles.
                     When two tiles with the same number touch, they <strong>merge into one!</strong>
-                    <hr />
+                </p>
+                <hr />
+                <p style="color: #776e65">
                     Note, this game is just a copy of the origional 2048 that was made by Gabriele Cirulli.
                 </p>
             </div>
