@@ -7,24 +7,6 @@
             border: 5px solid #8f7a66;
             background-color: #bbada0;
         }
-        #newGame {
-            padding: 5px 20px;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #f9f6f2;
-            line-height: 24px;
-            cursor: pointer;
-            text-align: center;
-            border: 1px solid #8f7a66;
-            background-color: #8f7a66;
-            width: 80px;
-            height: 25px;
-            font-family: Arial,serif;
-            font-size: 14px;
-            font-weight: bolder;
-            margin-left: auto;
-        }
         #score-title {
             color: white;
             height: 12px;
@@ -56,8 +38,6 @@
             background: #bbada0;
             margin-left: auto;
             margin-bottom: 15px;
-
-
         }
         #container {
             width: 432px;
@@ -69,12 +49,77 @@
             margin-left: 30px;
         }
         #lost {
+            background-color: rgba(255, 255, 255, 0.85);
             color: #776e65;
             font-family: Arial,serif;
-            position: absolute;
+            position: relative;
             display: none;
-            top: 365px;
-            left: 540px;
+            top: 426px;
+            font-weight: bolder;
+            font-size: 30px;
+            margin-top: -420px;
+            margin-left: 5px;
+            margin-right: 5px;
+            height: 264px;
+            padding-top: 156px;
+        }
+        .newGame {
+            padding: 5px 20px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #f9f6f2;
+            line-height: 24px;
+            cursor: pointer;
+            text-align: center;
+            border: 1px solid #8f7a66;
+            background-color: #8f7a66;
+            width: 80px;
+            height: 25px;
+            font-family: Arial, serif;
+            font-size: 14px;
+            font-weight: bolder;
+            margin-left: auto;
+        }
+        .rightButton {
+            padding: 5px 20px;
+            margin-top: 10px;
+            text-decoration: none;
+            color: #f9f6f2;
+            line-height: 24px;
+            cursor: pointer;
+            text-align: center;
+            border: 1px solid #8f7a66;
+            background-color: #8f7a66;
+            width: 80px;
+            height: 25px;
+            font-family: Arial, serif;
+            font-size: 14px;
+            font-weight: bolder;
+            float: left;
+            position: relative;
+            left: 0px;
+            top: -83px;
+        }
+        .leftButton {
+            padding: 5px 20px;
+            margin-top: 10px;
+            text-decoration: none;
+            color: #f9f6f2;
+            line-height: 24px;
+            cursor: pointer;
+            text-align: center;
+            border: 1px solid #8f7a66;
+            background-color: #8f7a66;
+            width: 80px;
+            height: 25px;
+            font-family: Arial, serif;
+            font-size: 14px;
+            font-weight: bolder;
+            float: left;
+            position: relative;
+            left: -180px;
+            top: -130px;
         }
         .unselectable {
             -webkit-touch-callout: none;
@@ -114,6 +159,7 @@
             clearMerged();
             componentsOnBoard = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
             myGameArea.clear();
+            closeLost();
             startGame();
         }
     };
@@ -125,15 +171,10 @@
         element.style.display = "block";
     }
 
-
-
-
-
-
-
-
-
-
+    function closeLost() {
+        var element = document.getElementById("lost");
+        element.style.display = "none";
+    }
 
     function checkAllSides(i, j) {
         var result = 0;
@@ -174,7 +215,7 @@
                     result += checkAllSides((i - (i % 4)) / 4, i % 4);
                 }
                 if (result === 0) {
-                    alert("GAME OVER, FOLKS!");
+                    youLost();
                 }
             }, 120);
         }
@@ -567,8 +608,7 @@
                 {
                     offset = 26;
                 }
-                else
-                {
+                else {
                     offset = 26;
                     var currentSize = Math.round(this.height / 80 * 24);
                     ctx.font = "bold " + currentSize + "px Arial";
@@ -617,9 +657,11 @@
                         <div id="score-title">SCORE</div>
                         <div id="score">0</div>
                     </div>
-                    <button onclick="youLost()">No Button</button>
-                    <div id="lost">You lost</div>
-                    <div id="newGame" class="unselectable" onclick="myGameArea.restart()">New Game</div>
+                    <div class="newGame unselectable" onclick="myGameArea.restart()">New Game</div><button onclick="youLost()">No Button</button>
+                </div>
+                <div id="lost" class="unselectable">You lost
+                    <div class="rightButton" onclick="closeLost()">Continue</div>
+                    <div class="leftButton" onclick="myGameArea.restart()">New Game</div>
                 </div>
                 <div id="game"></div>
                 <p style="">
@@ -628,7 +670,7 @@
                 </p>
                 <hr />
                 <p style="color: #776e65">
-                    Note, this game is just a copy of the origional 2048 that was made by Gabriele Cirulli.
+                    Note, this game is just a copy of the original 2048 that was made by Gabriele Cirulli.
                 </p>
             </div>
         </div>
